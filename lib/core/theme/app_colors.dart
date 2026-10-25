@@ -63,7 +63,7 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color grey3;
   final Color grey4;
 
-  /// Frosted bar tint (canvas @ 80%).
+  /// Bar tint (canvas @ 95%).
   final Color bar;
 
   /// Floating tab pill tint.
@@ -90,8 +90,8 @@ class AppColors extends ThemeExtension<AppColors> {
     grey: Color(0xFF8E8E93),
     grey3: Color(0xFFC7C7CC),
     grey4: Color(0xFFD1D1D6),
-    bar: Color(0xCCFFFFFF),
-    pill: Color(0xD9FFFFFF),
+    bar: Color(0xF2FFFFFF),
+    pill: Color(0xF2FFFFFF),
   );
 
   static const dark = AppColors(
@@ -115,8 +115,8 @@ class AppColors extends ThemeExtension<AppColors> {
     grey: Color(0xFF8E8E93),
     grey3: Color(0xFF48484A),
     grey4: Color(0xFF3A3A3C),
-    bar: Color(0xCC000000),
-    pill: Color(0xD92C2C2E),
+    bar: Color(0xF2000000),
+    pill: Color(0xF22C2C2E),
   );
 
   @override

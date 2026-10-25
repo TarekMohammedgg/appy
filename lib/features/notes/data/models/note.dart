@@ -59,15 +59,17 @@ class NoteDetail {
   final List<Note> related;
 
   NoteDetail copyWith({
+    String? title,
+    String? body,
     List<ChecklistItem>? checklist,
     List<String>? labels,
     List<String>? suggestedLabels,
   }) =>
       NoteDetail(
         id: id,
-        title: title,
+        title: title ?? this.title,
         dateLabel: dateLabel,
-        body: body,
+        body: body ?? this.body,
         checklist: checklist ?? this.checklist,
         audio: audio,
         labels: labels ?? this.labels,

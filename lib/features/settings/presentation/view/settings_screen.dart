@@ -7,6 +7,7 @@ import '../../../../core/theme/app_text.dart';
 import '../../../../core/widgets/inset_group.dart';
 import '../../../../core/widgets/large_title_bar.dart';
 import '../../../../core/widgets/pressable.dart';
+import '../../../../core/widgets/segmented.dart';
 import '../../data/settings_repository.dart';
 import '../view_model/settings_cubit.dart';
 
@@ -48,6 +49,27 @@ class SettingsScreen extends StatelessWidget {
                       label: 'لغة التطبيق',
                       value: s.language,
                       onTap: () => _pickLanguage(context, cubit),
+                    ),
+                    Padding(
+                      padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 12, 8),
+                      child: Row(
+                        spacing: 12,
+                        children: [
+                          Text('المظهر',
+                              style: AppText.bodyCompact.copyWith(color: c.ink)),
+                          Expanded(
+                            child: AppSegmented<ThemeMode>(
+                              value: s.themeMode,
+                              onChanged: cubit.setThemeMode,
+                              segments: const [
+                                (ThemeMode.system, 'تلقائي'),
+                                (ThemeMode.light, 'فاتح'),
+                                (ThemeMode.dark, 'داكن'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ]),
                   const GroupCaption('المزامنة'),

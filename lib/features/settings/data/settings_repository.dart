@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart' show ThemeMode;
+
 class AppSettings {
   const AppSettings({
     required this.name,
@@ -8,6 +10,7 @@ class AppSettings {
     required this.lastSync,
     required this.version,
     this.phone,
+    this.themeMode = ThemeMode.system,
   });
 
   final String name;
@@ -18,8 +21,10 @@ class AppSettings {
   final bool syncEnabled;
   final String lastSync;
   final String version;
+  final ThemeMode themeMode;
 
-  AppSettings copyWith({bool? syncEnabled, String? language}) => AppSettings(
+  AppSettings copyWith({bool? syncEnabled, String? language, ThemeMode? themeMode}) =>
+      AppSettings(
         name: name,
         email: email,
         phone: phone,
@@ -28,10 +33,13 @@ class AppSettings {
         syncEnabled: syncEnabled ?? this.syncEnabled,
         lastSync: lastSync,
         version: version,
+        themeMode: themeMode ?? this.themeMode,
       );
 }
 
 /// Fake for the UI phase. Version will come from package_info later.
+// ponytail: theme choice isn't persisted yet; saved with the rest of the
+// settings in the logic phase.
 class SettingsRepository {
   AppSettings load() => const AppSettings(
         name: 'طارق محمد',

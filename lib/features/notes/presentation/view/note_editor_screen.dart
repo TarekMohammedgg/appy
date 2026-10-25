@@ -91,8 +91,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: _body,
+                      // No autofocus: opening the keyboard during the page
+                      // transition relayouts every frame and stutters.
                       maxLines: null,
-                      autofocus: note.id == 'new',
                       style: AppText.body.copyWith(color: c.ink),
                       decoration: InputDecoration.collapsed(
                         hintText: 'ابدأ الكتابة…',
@@ -166,11 +167,19 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                 ),
               ),
             ),
+            // Sheets have no text field: close the keyboard first so the sheet
+            // and the keyboard don't animate against each other.
             _EditorToolbar(
-              onFormat: () => showFormatSheet(context),
+              onFormat: () {
+                FocusScope.of(context).unfocus();
+                showFormatSheet(context);
+              },
               onChecklist: cubit.addItem,
-              onRecord: () => showRecordingSheet(context),
-              onAi: () => showAiAssistSheet(context, _title.text),
+              onRecord: () {
+                FocusScope.of(context).unfocus();
+                showRecordingSheet(context);
+              },
+              onAi: () => showAiAssistDialog(context, _title.text),
             ),
           ],
         ),

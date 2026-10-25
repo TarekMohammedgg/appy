@@ -9,9 +9,7 @@ import '../features/notes/presentation/view/note_editor_screen.dart';
 import '../features/notes/presentation/view/notes_screen.dart';
 import '../features/notes/presentation/view_model/note_editor_cubit.dart';
 import '../features/notes/presentation/view_model/notes_cubit.dart';
-import '../features/settings/data/settings_repository.dart';
 import '../features/settings/presentation/view/settings_screen.dart';
-import '../features/settings/presentation/view_model/settings_cubit.dart';
 import '../features/tasks/data/tasks_repository.dart';
 import '../features/tasks/presentation/view/tasks_screen.dart';
 import '../features/tasks/presentation/view_model/tasks_cubit.dart';
@@ -59,16 +57,15 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/note/:id',
       builder: (context, state) => BlocProvider(
-        create: (_) => NoteEditorCubit(_notesRepository, state.pathParameters['id']!),
+        create: (_) => NoteEditorCubit(_notesRepository, state.pathParameters['id']!,
+            draft: state.extra as String?),
         child: const NoteEditorScreen(),
       ),
     ),
     GoRoute(
       path: '/settings',
-      builder: (context, state) => BlocProvider(
-        create: (_) => SettingsCubit(SettingsRepository()),
-        child: const SettingsScreen(),
-      ),
+      // SettingsCubit is provided app-wide in AppyApp.
+      builder: (context, state) => const SettingsScreen(),
     ),
   ],
 );

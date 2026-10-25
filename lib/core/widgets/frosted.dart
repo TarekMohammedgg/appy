@@ -1,8 +1,9 @@
-import 'dart:ui';
-
 import 'package:flutter/widgets.dart';
 
-/// Frosted bar: tint over a 20px blur (nav bars, pill, editor toolbar).
+/// Near-opaque bar surface (pill, editor toolbar).
+// ponytail: no BackdropFilter. A live blur re-renders on every scroll frame
+// and the 95% tint hides it anyway; bring it back only if a design needs
+// see-through bars.
 class Frosted extends StatelessWidget {
   const Frosted({
     super.key,
@@ -17,12 +18,9 @@ class Frosted extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final content = BackdropFilter(
-      filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-      child: ColoredBox(color: color, child: child),
-    );
+    final content = ColoredBox(color: color, child: child);
     return borderRadius == null
-        ? ClipRect(child: content)
+        ? content
         : ClipRRect(borderRadius: borderRadius!, child: content);
   }
 }

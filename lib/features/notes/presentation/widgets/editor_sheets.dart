@@ -7,156 +7,69 @@ import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text.dart';
+import '../../../../core/widgets/input_dialog.dart';
 import '../../../../core/widgets/pressable.dart';
 
-// ── AI assist ("AI sidebar") ──────────────────────────────────────────────
+// ── AI assist ─────────────────────────────────────────────────────────────
 
-void showAiAssistSheet(BuildContext context, String noteTitle) {
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    builder: (_) => DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.4,
-      minChildSize: 0.25,
-      maxChildSize: 0.9,
-      snap: true,
-      snapSizes: const [0.4, 0.9],
-      builder: (context, scroll) => _AiAssistBody(scroll: scroll, noteTitle: noteTitle),
-    ),
-  );
+void showAiAssistDialog(BuildContext context, String noteTitle) {
+  showDialog<void>(context: context, builder: (_) => _AiAssistDialog(noteTitle));
 }
 
-class _AiAssistBody extends StatefulWidget {
-  const _AiAssistBody({required this.scroll, required this.noteTitle});
+/// Shared [InputDialog]; the question and answer show above the field and the
+/// dialog stays open for a follow-up.
+class _AiAssistDialog extends StatefulWidget {
+  const _AiAssistDialog(this.noteTitle);
 
-  final ScrollController scroll;
   final String noteTitle;
 
   @override
-  State<_AiAssistBody> createState() => _AiAssistBodyState();
+  State<_AiAssistDialog> createState() => _AiAssistDialogState();
 }
 
-class _AiAssistBodyState extends State<_AiAssistBody> {
+class _AiAssistDialogState extends State<_AiAssistDialog> {
   String? _asked;
-
-  static const _suggestions = ['لخّص الملاحظة', 'إيه المهام اللي فيها؟', 'اقترح عنوان'];
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final title = widget.noteTitle.isEmpty ? 'ملاحظة جديدة' : widget.noteTitle;
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
-            child: Row(
-              spacing: 8,
+    return InputDialog(
+      icon: CupertinoIcons.sparkles,
+      title: 'اسأل عن الملاحظة',
+      contextLabel: 'عن: $title',
+      hint: 'اسأل عن الملاحظة دي…',
+      closeOnSubmit: false,
+      suggestions: _asked == null
+          ? const ['لخّص الملاحظة', 'إيه المهام اللي فيها؟', 'اقترح عنوان']
+          : const [],
+      onSubmit: (q) => setState(() => _asked = q),
+      header: _asked == null
+          ? null
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 12,
               children: [
-                Icon(CupertinoIcons.sparkles, size: 20, color: c.accentStrong),
-                Text('اسأل عن الملاحظة', style: AppText.headline.copyWith(color: c.ink)),
-                const Spacer(),
-                Container(
-                  constraints: const BoxConstraints(maxWidth: 160),
-                  padding:
-                      const EdgeInsetsDirectional.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: c.fill3,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text('عن: $title',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: AppText.footnote.copyWith(color: c.ink2)),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              controller: widget.scroll,
-              padding: const EdgeInsets.all(16),
-              children: [
-                if (_asked == null)
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final s in _suggestions)
-                        Pressable(
-                          onTap: () => setState(() => _asked = s),
-                          borderRadius: BorderRadius.circular(999),
-                          child: Container(
-                            padding: const EdgeInsetsDirectional.symmetric(
-                                horizontal: 14, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: c.fill3,
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(s, style: AppText.subhead.copyWith(color: c.ink)),
-                          ),
-                        ),
-                    ],
-                  )
-                else ...[
-                  Align(
-                    alignment: AlignmentDirectional.centerEnd,
-                    child: Container(
-                      padding: const EdgeInsetsDirectional.symmetric(
-                          horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: c.raised,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Text(_asked!, style: AppText.body.copyWith(color: c.ink)),
+                Align(
+                  alignment: AlignmentDirectional.centerEnd,
+                  child: Container(
+                    padding:
+                        const EdgeInsetsDirectional.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: c.raised,
+                      borderRadius: BorderRadius.circular(18),
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    'الملاحظة بتقول إن أول phase هتبقى capture + sync لـNotion، '
-                    'وإن اختيار الـeditor مستني الـspike. فيها 3 مهام، واحدة منهم خلصت.',
-                    style: AppText.body.copyWith(color: c.ink),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(16, 4, 8, 12),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    style: AppText.body.copyWith(color: c.ink),
-                    decoration: InputDecoration(
-                      hintText: 'اسأل عن الملاحظة دي…',
-                      hintStyle: AppText.body.copyWith(color: c.ink3),
-                      filled: true,
-                      fillColor: c.raised,
-                      isDense: true,
-                      contentPadding: const EdgeInsetsDirectional.symmetric(
-                          horizontal: 14, vertical: 8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(18),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                    child: Text(_asked!, style: AppText.body.copyWith(color: c.ink)),
                   ),
                 ),
-                IconButton(
-                  tooltip: 'تسجيل صوت',
-                  onPressed: () {},
-                  icon: Icon(CupertinoIcons.mic, color: c.ink2),
+                // ponytail: canned answer until the AI call lands in the logic phase.
+                Text(
+                  'الملاحظة بتقول إن أول phase هتبقى capture + sync لـNotion، '
+                  'وإن اختيار الـeditor مستني الـspike. فيها 3 مهام، واحدة منهم خلصت.',
+                  style: AppText.body.copyWith(color: c.ink),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

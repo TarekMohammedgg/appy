@@ -4,9 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/layout.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_text.dart';
+
 import '../../../../core/widgets/buttons.dart';
+import '../../../../core/widgets/input_dialog.dart';
 import '../../../../core/widgets/large_title_bar.dart';
+import '../../../../core/widgets/segmented.dart';
 import '../view_model/tasks_cubit.dart';
 import '../view_model/tasks_state.dart';
 import '../widgets/tasks_views.dart';
@@ -19,6 +21,9 @@ class TasksScreen extends StatelessWidget {
     final c = context.colors;
     final cubit = context.read<TasksCubit>();
     return Scaffold(
+      // Input happens in centered dialogs; resizing here would relayout the
+      // whole list behind the dialog on every keyboard frame.
+      resizeToAvoidBottomInset: false,
       backgroundColor: c.grouped,
       body: Stack(
         children: [
@@ -29,23 +34,14 @@ class TasksScreen extends StatelessWidget {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsetsDirectional.symmetric(horizontal: 16),
-                    child: CupertinoSlidingSegmentedControl<TasksView>(
-                      groupValue: state.view,
-                      thumbColor: c.surface,
-                      backgroundColor: c.fill3,
-                      onValueChanged: (v) => cubit.setView(v!),
-                      children: {
-                        for (final (v, label) in const [
-                          (TasksView.list, 'قائمة'),
-                          (TasksView.calendar, 'تقويم'),
-                          (TasksView.board, 'بورد'),
-                        ])
-                          v: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 6),
-                            child: Text(label,
-                                style: AppText.footnoteStrong.copyWith(color: c.ink)),
-                          ),
-                      },
+                    child: AppSegmented<TasksView>(
+                      value: state.view,
+                      onChanged: cubit.setView,
+                      segments: const [
+                        (TasksView.list, 'قائمة'),
+                        (TasksView.calendar, 'تقويم'),
+                        (TasksView.board, 'بورد'),
+                      ],
                     ),
                   ),
                 ),
@@ -65,7 +61,10 @@ class TasksScreen extends StatelessWidget {
           AppFab(
             icon: CupertinoIcons.plus,
             label: 'إضافة مهمة أو عادة',
-            onPressed: () => _showAddSheet(context, cubit),
+            onPressed: () => showDialog<void>(
+              context: context,
+              builder: (_) => _AddItemDialog(cubit: cubit),
+            ),
           ),
         ],
       ),
@@ -73,93 +72,31 @@ class TasksScreen extends StatelessWidget {
   }
 }
 
-void _showAddSheet(BuildContext context, TasksCubit cubit) {
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    builder: (_) => _AddItemSheet(cubit: cubit),
-  );
-}
-
-class _AddItemSheet extends StatefulWidget {
-  const _AddItemSheet({required this.cubit});
+/// Task/habit toggle on top of the shared [InputDialog].
+class _AddItemDialog extends StatefulWidget {
+  const _AddItemDialog({required this.cubit});
 
   final TasksCubit cubit;
 
   @override
-  State<_AddItemSheet> createState() => _AddItemSheetState();
+  State<_AddItemDialog> createState() => _AddItemDialogState();
 }
 
-class _AddItemSheetState extends State<_AddItemSheet> {
-  final _controller = TextEditingController();
+class _AddItemDialogState extends State<_AddItemDialog> {
   bool _habit = false;
 
   @override
-  void initState() {
-    super.initState();
-    _controller.addListener(() => setState(() {}));
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    widget.cubit.add(_controller.text.trim(), habit: _habit);
-    Navigator.pop(context);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final c = context.colors;
-    final canAdd = _controller.text.trim().isNotEmpty;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-          16, 0, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          spacing: 16,
-          children: [
-            CupertinoSlidingSegmentedControl<bool>(
-              groupValue: _habit,
-              thumbColor: c.surface,
-              backgroundColor: c.fill3,
-              onValueChanged: (v) => setState(() => _habit = v!),
-              children: {
-                false: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Text('مهمة', style: AppText.footnoteStrong.copyWith(color: c.ink)),
-                ),
-                true: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Text('عادة', style: AppText.footnoteStrong.copyWith(color: c.ink)),
-                ),
-              },
-            ),
-            TextField(
-              controller: _controller,
-              autofocus: true,
-              onSubmitted: (_) => canAdd ? _submit() : null,
-              style: AppText.body.copyWith(color: c.ink),
-              decoration: InputDecoration(
-                hintText: _habit ? 'عادة جديدة' : 'مهمة جديدة',
-                hintStyle: AppText.body.copyWith(color: c.ink3),
-                filled: true,
-                fillColor: c.raised,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-            PrimaryButton(label: 'إضافة', onPressed: canAdd ? _submit : null),
-          ],
-        ),
+    return InputDialog(
+      icon: CupertinoIcons.plus,
+      title: 'إضافة جديدة',
+      hint: _habit ? 'عادة جديدة…' : 'مهمة جديدة…',
+      header: AppSegmented<bool>(
+        value: _habit,
+        onChanged: (v) => setState(() => _habit = v),
+        segments: const [(false, 'مهمة'), (true, 'عادة')],
       ),
+      onSubmit: (text) => widget.cubit.add(text, habit: _habit),
     );
   }
 }

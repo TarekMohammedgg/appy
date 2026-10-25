@@ -17,7 +17,9 @@ CupertinoSliverNavigationBar largeTitleBar(
     leading: showMenu ? const SettingsButton() : null,
     automaticallyImplyLeading: !showMenu,
     padding: const EdgeInsetsDirectional.only(start: 4, end: 8),
-    backgroundColor: c.grouped.withValues(alpha: 0.8),
+    // Opaque on purpose: a translucent color makes the bar blur its backdrop
+    // on every scroll frame.
+    backgroundColor: c.grouped,
     border: null,
     transitionBetweenRoutes: false,
   );
