@@ -35,14 +35,12 @@ void main() {
     await tester.tap(find.text('الملاحظات').first);
     await tester.pumpAndSettle();
 
-    // New note dialog: first line becomes the editor title.
+    // New note opens the editor directly, title focused after the transition.
     await tester.tap(find.bySemanticsLabel('ملاحظة جديدة'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'فكرة سريعة\nتفاصيل');
-    await tester.pump();
-    await tester.tap(find.bySemanticsLabel('إرسال'));
-    await tester.pumpAndSettle();
-    expect(find.text('فكرة سريعة'), findsOneWidget);
+    expect(find.text('ابدأ الكتابة…'), findsOneWidget);
+    expect(tester.widget<TextField>(find.byType(TextField).first).focusNode!.hasFocus,
+        isTrue);
     await tester.tap(find.text('الملاحظات').first);
     await tester.pumpAndSettle();
 

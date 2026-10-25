@@ -7,7 +7,6 @@ import '../../../../core/layout.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text.dart';
 import '../../../../core/widgets/buttons.dart';
-import '../../../../core/widgets/input_dialog.dart';
 import '../../../../core/widgets/inset_group.dart';
 import '../../../../core/widgets/large_title_bar.dart';
 import '../../../../core/widgets/pressable.dart';
@@ -83,16 +82,7 @@ class NotesScreen extends StatelessWidget {
           AppFab(
             icon: CupertinoIcons.square_pencil,
             label: 'ملاحظة جديدة',
-            onPressed: () => showDialog<void>(
-              context: context,
-              builder: (_) => InputDialog(
-                icon: CupertinoIcons.square_pencil,
-                title: 'ملاحظة جديدة',
-                hint: 'اكتب فكرتك… أول سطر هيبقى العنوان',
-                multiline: true,
-                onSubmit: (text) => context.push('/note/new', extra: text),
-              ),
-            ),
+            onPressed: () => context.push('/note/new'),
           ),
         ],
       ),

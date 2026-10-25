@@ -57,8 +57,7 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/note/:id',
       builder: (context, state) => BlocProvider(
-        create: (_) => NoteEditorCubit(_notesRepository, state.pathParameters['id']!,
-            draft: state.extra as String?),
+        create: (_) => NoteEditorCubit(_notesRepository, state.pathParameters['id']!),
         child: const NoteEditorScreen(),
       ),
     ),

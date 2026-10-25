@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_text.dart';
+import 'auto_direction.dart';
 import 'pressable.dart';
 
 /// The one way to type something new: add a task, start a note, ask the AI.
@@ -153,18 +154,22 @@ class _InputDialogState extends State<InputDialog> {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 6),
-                      child: TextField(
+                      child: AutoDirection(
                         controller: _controller,
-                        autofocus: true,
-                        minLines: 1,
-                        maxLines: widget.multiline ? 6 : 1,
-                        textInputAction:
-                            widget.multiline ? TextInputAction.newline : TextInputAction.done,
-                        onSubmitted: widget.multiline ? null : _submit,
-                        style: AppText.bodyCompact.copyWith(color: c.ink),
-                        decoration: InputDecoration.collapsed(
-                          hintText: widget.hint,
-                          hintStyle: AppText.bodyCompact.copyWith(color: c.ink3),
+                        child: TextField(
+                          controller: _controller,
+                          autofocus: true,
+                          minLines: 1,
+                          maxLines: widget.multiline ? 6 : 1,
+                          textInputAction: widget.multiline
+                              ? TextInputAction.newline
+                              : TextInputAction.done,
+                          onSubmitted: widget.multiline ? null : _submit,
+                          style: AppText.bodyCompact.copyWith(color: c.ink),
+                          decoration: InputDecoration.collapsed(
+                            hintText: widget.hint,
+                            hintStyle: AppText.bodyCompact.copyWith(color: c.ink3),
+                          ),
                         ),
                       ),
                     ),

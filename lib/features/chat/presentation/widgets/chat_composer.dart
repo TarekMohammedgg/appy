@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text.dart';
+import '../../../../core/widgets/auto_direction.dart';
 
 /// Attach + web toggle on the start side, field, mic that turns into send.
 class ChatComposer extends StatefulWidget {
@@ -60,23 +61,26 @@ class _ChatComposerState extends State<ChatComposer> {
           ),
           _WebToggle(active: widget.webSearch, onTap: widget.onToggleWeb),
           Expanded(
-            child: TextField(
+            child: AutoDirection(
               controller: _controller,
-              minLines: 1,
-              maxLines: 6,
-              textInputAction: TextInputAction.newline,
-              style: AppText.body.copyWith(color: c.ink),
-              decoration: InputDecoration(
-                hintText: 'اسأل أو سجّل حاجة…',
-                hintStyle: AppText.body.copyWith(color: c.ink3),
-                filled: true,
-                fillColor: c.raised,
-                isDense: true,
-                contentPadding:
-                    const EdgeInsetsDirectional.symmetric(horizontal: 14, vertical: 8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(18),
-                  borderSide: BorderSide.none,
+              child: TextField(
+                controller: _controller,
+                minLines: 1,
+                maxLines: 6,
+                textInputAction: TextInputAction.newline,
+                style: AppText.body.copyWith(color: c.ink),
+                decoration: InputDecoration(
+                  hintText: 'اسأل أو سجّل حاجة…',
+                  hintStyle: AppText.body.copyWith(color: c.ink3),
+                  filled: true,
+                  fillColor: c.raised,
+                  isDense: true,
+                  contentPadding:
+                      const EdgeInsetsDirectional.symmetric(horizontal: 14, vertical: 8),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(18),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ),

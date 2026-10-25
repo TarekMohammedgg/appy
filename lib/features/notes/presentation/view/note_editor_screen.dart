@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text.dart';
+import '../../../../core/widgets/auto_direction.dart';
 import '../../../../core/widgets/buttons.dart';
 import '../../../../core/widgets/check_circle.dart';
 import '../../../../core/widgets/frosted.dart';
@@ -14,6 +15,7 @@ import '../../data/models/note.dart';
 import '../view_model/note_editor_cubit.dart';
 import '../widgets/audio_attachment.dart';
 import '../widgets/editor_sheets.dart';
+import '../widgets/note_body_editor.dart';
 
 /// Apple Notes-style page. Title/body are plain fields until the rich-text
 /// editor package is picked (spike); the blocks below show the final look.
@@ -27,12 +29,36 @@ class NoteEditorScreen extends StatefulWidget {
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
   late final NoteDetail _initial = context.read<NoteEditorCubit>().state;
   late final _title = TextEditingController(text: _initial.title);
-  late final _body = TextEditingController(text: _initial.body);
+  final _titleFocus = FocusNode();
+  Animation<double>? _route;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // New note: open the keyboard only once the page has finished sliding in;
+    // opening it mid-transition relayouts every frame and stutters.
+    if (_initial.id == 'new' && _route == null) {
+      _route = ModalRoute.of(context)?.animation;
+      if (_route == null || _route!.isCompleted) {
+        _titleFocus.requestFocus();
+      } else {
+        _route!.addStatusListener(_focusWhenShown);
+      }
+    }
+  }
+
+  void _focusWhenShown(AnimationStatus status) {
+    if (status.isCompleted) {
+      _route?.removeStatusListener(_focusWhenShown);
+      if (mounted) _titleFocus.requestFocus();
+    }
+  }
 
   @override
   void dispose() {
+    _route?.removeStatusListener(_focusWhenShown);
+    _titleFocus.dispose();
     _title.dispose();
-    _body.dispose();
     super.dispose();
   }
 
@@ -79,27 +105,21 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   padding: const EdgeInsetsDirectional.fromSTEB(16, 8, 16, 24),
                   children: [
                     _DateStamp(note.dateLabel),
-                    TextField(
+                    AutoDirection(
                       controller: _title,
-                      maxLines: null,
-                      style: AppText.title1.copyWith(color: c.ink),
-                      decoration: InputDecoration.collapsed(
-                        hintText: 'العنوان',
-                        hintStyle: AppText.title1.copyWith(color: c.ink3),
+                      child: TextField(
+                        controller: _title,
+                        focusNode: _titleFocus,
+                        maxLines: null,
+                        style: AppText.title1.copyWith(color: c.ink),
+                        decoration: InputDecoration.collapsed(
+                          hintText: 'العنوان',
+                          hintStyle: AppText.title1.copyWith(color: c.ink3),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 8),
-                    TextField(
-                      controller: _body,
-                      // No autofocus: opening the keyboard during the page
-                      // transition relayouts every frame and stutters.
-                      maxLines: null,
-                      style: AppText.body.copyWith(color: c.ink),
-                      decoration: InputDecoration.collapsed(
-                        hintText: 'ابدأ الكتابة…',
-                        hintStyle: AppText.body.copyWith(color: c.ink3),
-                      ),
-                    ),
+                    NoteBodyEditor(initialText: _initial.body),
                     const SizedBox(height: 8),
                     for (var i = 0; i < note.checklist.length; i++)
                       Row(
