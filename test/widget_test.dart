@@ -41,8 +41,11 @@ void main() {
     expect(find.text('ابدأ الكتابة…'), findsOneWidget);
     expect(tester.widget<TextField>(find.byType(TextField).first).focusNode!.hasFocus,
         isTrue);
-    await tester.tap(find.text('الملاحظات').first);
+    // "تم" returns to the Notes tab.
+    await tester.tap(find.text('تم'));
     await tester.pumpAndSettle();
+    expect(find.text('ابدأ الكتابة…'), findsNothing);
+    expect(find.text('اجتماع مشروع appy'), findsOneWidget);
 
     // Tasks: list, calendar, board.
     await tester.tap(find.text('المهام').last);

@@ -93,7 +93,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   PlainButton(
                     label: 'تم',
                     bold: true,
-                    onPressed: () => FocusScope.of(context).unfocus(),
+                    // Back to the Notes tab even when opened from a chat citation.
+                    onPressed: () => context.go('/notes'),
                   ),
                   const SizedBox(width: 8),
                 ],
